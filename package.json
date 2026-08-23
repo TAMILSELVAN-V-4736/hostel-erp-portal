@@ -1,0 +1,18 @@
+{
+  "name": "hostel-erp",
+  "version": "1.0.0",
+  "description": "Hostel ERP Portal",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "dependencies": {
+    "react": "^18.3.1"
+  }
+}

@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  HOSTEL_ADMIN
+  WARDEN
+  MAINTENANCE_STAFF
+  MESS_STAFF
+  SECURITY
+  STUDENT
+}
+
+enum HostelType {
+  BOYS
+  GIRLS
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum AllocationStatus {
+  ACTIVE
+  VACATED
+  TRANSFERRED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  password  String
+  role      Role         @default(STUDENT)
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  student             Student?
+  approvedLeaves      LeaveRequest[]
+  approvedPasses      GatePass[]
+  assignedMaintenance MaintenanceRequest[]
+}
+
+model Student {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  studentId        String   @unique
+  name             String
+  department       String?
+  year             Int?
+  contact          String?
+  emergencyContact String?
+  guardianName     String?
+  guardianContact  String?
+  profilePhoto     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents           StudentDocument[]
+  allocations         RoomAllocation[]
+  leaveRequests       LeaveRequest[]
+  gatePasses          GatePass[]
+  maintenanceRequests MaintenanceRequest[]
+  messFeedbacks       MessFeedback[]
+  grievances          Grievance[]
+  feeRecords          FeeRecord[]
+}
+
+model StudentDocument {
+  id        String   @id @default(uuid())
+  studentId String
+  type      String
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Hostel {
+  id        String       @id @default(uuid())
+  name      String
+  type      HostelType
+  address   String?
+  capacity  Int
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  blocks Block[]
+}
+
+model Block {
+  id         String   @id @default(uuid())
+  hostelId   String
+  name       String
+  floorCount Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  hostel Hostel  @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  floors Floor[]
+}
+
+model Floor {
+  id        String   @id @default(uuid())
+  blockId   String
+  number    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  block Block  @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  rooms Room[]
+}
+
+model Room {
+  id         String       @id @default(uuid())
+  floorId    String
+  number     String
+  capacity   Int
+  type       String?
+  status     EntityStatus @default(ACTIVE)
+  facilities String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  floor Floor @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  beds  Bed[]
+}
+
+model Bed {
+  id        String       @id @default(uuid())
+  roomId    String
+  number    String
+  status    EntityStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  room        Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  allocations RoomAllocation[]
+}
+
+model RoomAllocation {
+  id          String           @id @default(uuid())
+  studentId   String
+  bedId       String
+  allocatedAt DateTime         @default(now())
+  vacatedAt   DateTime?
+  status      AllocationStatus @default(ACTIVE)
+
+  student Student @relation(fields: [studentId], references: [id])
+  bed     Bed     @relation(fields: [bedId], references: [id])
+}
+
+model LeaveRequest {
+  id           String        @id @default(uuid())
+  studentId    String
+  startDate    DateTime
+  endDate      DateTime
+  reason       String
+  status       RequestStatus @default(PENDING)
+  approvedById String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  student    Student @relation(fields: [studentId], references: [id])
+  approvedBy User?   @relation(fields: [approvedById], references: [id])
+}
+
+model GatePass {
+  id                 String        @id @default(uuid())
+  studentId          String
+  exitTime           DateTime
+  expectedReturnTime DateTime
+  actualReturnTime   DateTime?
+  reason             String
+  status             RequestStatus @default(PENDING)
+  approvedById       String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  student    Student @relation(fields: [studentId], references: [id])
+  approvedBy User?   @relation(fields: [approvedById], references: [id])
+}
+
+enum MaintenanceCategory {
+  PLUMBING
+  ELECTRICAL
+  FURNITURE
+  OTHER
+}
+
+model MaintenanceRequest {
+  id           String              @id @default(uuid())
+  studentId    String
+  title        String
+  description  String
+  category     MaintenanceCategory
+  status       RequestStatus       @default(PENDING)
+  assignedToId String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  student    Student @relation(fields: [studentId], references: [id])
+  assignedTo User?   @relation(fields: [assignedToId], references: [id])
+}
+
+model MessMenu {
+  id        String   @id @default(uuid())
+  dayOfWeek Int // 0-6 (Sunday-Saturday)
+  breakfast String
+  lunch     String
+  snacks    String
+  dinner    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MessFeedback {
+  id        String   @id @default(uuid())
+  studentId String
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Grievance {
+  id          String        @id @default(uuid())
+  studentId   String
+  title       String
+  description String
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Notice {
+  id             String   @id @default(uuid())
+  title          String
+  content        String
+  targetAudience String // ALL, STUDENT, STAFF
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum FeeType {
+  HOSTEL
+  MESS
+  OTHER
+}
+
+enum FeeStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model FeeRecord {
+  id        String    @id @default(uuid())
+  studentId String
+  amount    Float
+  type      FeeType
+  status    FeeStatus @default(PENDING)
+  dueDate   DateTime
+  paidDate  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id])
+}
