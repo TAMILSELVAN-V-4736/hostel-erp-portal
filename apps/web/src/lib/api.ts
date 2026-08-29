@@ -1,4 +1,8 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+let rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+if (rawApiUrl && !rawApiUrl.endsWith('/api/v1') && !rawApiUrl.endsWith('/api/v1/')) {
+    rawApiUrl = `${rawApiUrl.replace(/\/$/, '')}/api/v1`;
+}
+export const API_URL = rawApiUrl;
 
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   let token = null;
