@@ -9,7 +9,7 @@ services:
     name: hostel-erp-api
     env: node
     plan: free
-    buildCommand: npm install --include=dev && npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build --workspace=api
+    buildCommand: npm install --include=dev && npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build --workspace=api && cd apps/api && npx prisma migrate deploy && npx prisma db seed
     startCommand: cd apps/api && npx prisma migrate deploy && node dist/src/main.js
     envVars:
       - key: NODE_VERSION
