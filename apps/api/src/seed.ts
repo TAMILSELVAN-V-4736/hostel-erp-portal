@@ -1,7 +1,13 @@
 import { PrismaClient, Role, HostelType } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+console.log('DATABASE_URL starts with:', process.env.DATABASE_URL?.substring(0, 20));
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding data...');
