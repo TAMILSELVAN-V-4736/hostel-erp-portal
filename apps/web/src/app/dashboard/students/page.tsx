@@ -65,7 +65,7 @@ export default function StudentsPage() {
       
       toast.success("Student added successfully");
       setShowAddModal(false);
-      setFormData({ name: "", email: "", rollNumber: "", department: "", contactNo: "" });
+      setFormData({ name: "", email: "", password: "", rollNumber: "", department: "", contactNo: "", bloodGroup: "" });
       fetchStudents();
     } catch (err: any) {
       toast.error(err.message || "Failed to add student");
