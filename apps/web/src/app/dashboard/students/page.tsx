@@ -61,10 +61,7 @@ export default function StudentsPage() {
         })
       });
       
-      if (!studentRes.ok) {
-        // If student creation fails, we technically should rollback user, but skipping for simplicity in UI
-        throw new Error("Failed to create student profile.");
-      }
+      // fetchWithAuth automatically throws on error, no need to check res.ok
       
       toast.success("Student added successfully");
       setShowAddModal(false);
