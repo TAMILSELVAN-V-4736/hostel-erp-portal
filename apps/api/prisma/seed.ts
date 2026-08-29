@@ -25,39 +25,42 @@ async function main() {
   console.log({ superAdmin });
 
   // Create Demo Hostel
-  const hostel = await prisma.hostel.create({
-    data: {
-      name: 'Alpha Boys Hostel',
-      type: HostelType.BOYS,
-      capacity: 100,
-      blocks: {
-        create: [
-          {
-            name: 'Block A',
-            floorCount: 2,
-            floors: {
-              create: [
-                {
-                  number: 1,
-                  rooms: {
-                    create: [
-                      {
-                        number: '101',
-                        capacity: 2,
-                        beds: {
-                          create: [{ number: '101-A' }, { number: '101-B' }],
+  let hostel = await prisma.hostel.findFirst({ where: { name: 'Alpha Boys Hostel' } });
+  if (!hostel) {
+    hostel = await prisma.hostel.create({
+      data: {
+        name: 'Alpha Boys Hostel',
+        type: HostelType.BOYS,
+        capacity: 100,
+        blocks: {
+          create: [
+            {
+              name: 'Block A',
+              floorCount: 2,
+              floors: {
+                create: [
+                  {
+                    number: 1,
+                    rooms: {
+                      create: [
+                        {
+                          number: '101',
+                          capacity: 2,
+                          beds: {
+                            create: [{ number: '101-A' }, { number: '101-B' }],
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-  });
+    });
+  }
 
   console.log({ hostel });
 
